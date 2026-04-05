@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Thought Partner</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER — Extension title and settings shortcut
+       ============================================================ -->
+  <header class="header">
+    <h1 class="header__title">Thought Partner</h1>
+    <!-- Settings icon opens the API key configuration page.
+         The status dot is added here and coloured green/yellow by init() -->
+    <button class="header__settings-btn" id="btn-settings" title="Settings">
+      &#9881;<span class="key-status-dot" id="key-status-dot"></span>
+    </button>
+  </header>
+
+  <!-- ============================================================
+       INFO BANNER — Soft blue tip shown when the current tab is not
+       linkedin.com. Dismissable. Hidden by default; init() reveals it.
+       ============================================================ -->
+  <section class="info-banner" id="info-banner" hidden>
+    <p class="info-banner__message" id="info-banner-message">
+      Tip: open this extension while browsing LinkedIn for the best experience
+    </p>
+    <button class="info-banner__dismiss" id="btn-dismiss-info" title="Dismiss">&#10005;</button>
+  </section>
+
+  <!-- ============================================================
+       API KEY WARNING BANNER — Shown on load if either key is missing.
+       Includes an "Open settings" link. init() reveals and colours it.
+       ============================================================ -->
+  <section class="keys-warning" id="keys-warning" hidden>
+    <p class="keys-warning__message">
+      &#9888; API keys not set &mdash;
+      <a class="keys-warning__link" id="btn-open-settings" href="#">Open settings</a>
+      to configure.
+    </p>
+  </section>
+
+  <!-- ============================================================
+       ERROR BANNER — Dismissable red banner. Auto-dismisses after 6s.
+       Hidden by default; revealed and populated by showError() in JS.
+       ============================================================ -->
+  <section class="error-banner" id="error-banner" hidden>
+    <p class="error-banner__message" id="error-banner-message"></p>
+    <button class="error-banner__dismiss" id="btn-dismiss-error" title="Dismiss">&#10005;</button>
+  </section>
+
+  <!-- ============================================================
+       WARNING BANNER — Dismissable yellow banner for non-critical
+       issues. Hidden by default; revealed by showWarning() in JS.
+       ============================================================ -->
+  <section class="warning-banner" id="warning-banner" hidden>
+    <p class="warning-banner__message" id="warning-banner-message"></p>
+    <button class="warning-banner__dismiss" id="btn-dismiss-warning" title="Dismiss">&#10005;</button>
+  </section>
+
+  <!-- ============================================================
+       SUCCESS BANNER — Dismissable green banner for confirmations.
+       Hidden by default; revealed by showSuccess() in JS.
+       ============================================================ -->
+  <section class="success-banner" id="success-banner" hidden>
+    <p class="success-banner__message" id="success-banner-message"></p>
+    <button class="success-banner__dismiss" id="btn-dismiss-success" title="Dismiss">&#10005;</button>
+  </section>
+
+  <!-- ============================================================
+       DRAFT INPUT — Textarea for the user to paste their post draft.
+       Replaces the old "navigate to LinkedIn" status message for
+       the Phase 3 workflow.
+       ============================================================ -->
+  <section class="draft-section">
+    <label class="draft-section__label" for="draft-input">
+      Paste your LinkedIn draft
+    </label>
+    <textarea
+      class="draft-section__textarea"
+      id="draft-input"
+      placeholder="Paste your post here to check its originality…"
+      rows="5"
+      spellcheck="false"
+    ></textarea>
+  </section>
+
+  <!-- ============================================================
+       ACTION AREA — Primary "Scan" button. Disabled until API keys
+       are confirmed present by init().
+       ============================================================ -->
+  <section class="action-area">
+    <button class="btn-check" id="btn-check" disabled>
+      Scan
+    </button>
+  </section>
+
+  <!-- ============================================================
+       KEYWORDS SECTION — Hidden until keyword extraction succeeds.
+       Shows extracted keywords as editable pills. The user can
+       remove pills with × or add custom ones with the + Add pill.
+       Also contains the time window selector used by the search step.
+       ============================================================ -->
+  <section class="keywords-section" id="keywords-section" hidden>
+    <h2 class="keywords-section__heading">Keywords</h2>
+    <div class="keywords-section__pills" id="keywords-pills">
+      <!-- Keyword pills are injected here by renderKeywords() in popup.js -->
+    </div>
+
+    <!-- TIME WINDOW — Three toggle buttons letting the user control how far
+         back in time the LinkedIn search looks. Default is 7 days.
+         The active button is tracked in state.windowDays in popup.js. -->
+    <div class="time-window">
+      <span class="time-window__label">Search within:</span>
+      <div class="time-window__buttons">
+        <button class="time-window__btn" data-days="1">24 hours</button>
+        <button class="time-window__btn time-window__btn--active" data-days="7">7 days</button>
+        <button class="time-window__btn" data-days="30">30 days</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SEARCH RESULTS SECTION — Hidden until renderSearchResults()
+       populates it. Shows one card per deduplicated LinkedIn post
+       found by Serper. Appears between keywords and the score.
+       ============================================================ -->
+  <section id="search-results-section" hidden>
+    <!-- Header and cards are fully injected by renderSearchResults() in popup.js -->
+  </section>
+
+  <!-- ============================================================
+       SEARCH STATUS LINE — Shows "Found X posts across Y searches"
+       after the Serper search completes. Hidden until then.
+       ============================================================ -->
+  <p class="search-status" id="search-status" hidden></p>
+
+  <!-- ============================================================
+       NO-RESULTS WARNING — Yellow banner shown when Serper returns
+       zero posts for all keyword queries.
+       ============================================================ -->
+  <section class="no-results-warning" id="no-results-warning" hidden>
+    <p class="no-results-warning__message">
+      &#128269; No recent posts found on this topic &mdash; your idea may already be
+      quite original, or try broader keywords.
+    </p>
+  </section>
+
+  <!-- ============================================================
+       ANALYSIS SECTION — Hidden until analyzeOriginality() completes.
+       Shows score bar, repeated themes, and three rewrite suggestions.
+       ============================================================ -->
+  <section class="analysis-section" id="analysis-section" hidden>
+
+    <!-- SCORE — large number, filled colour bar, and a scale label -->
+    <div class="analysis-score">
+      <div class="analysis-score__header">
+        <span class="analysis-score__number" id="score-number"></span>
+        <span class="analysis-score__scale">/ 10</span>
+        <span class="analysis-score__label">1 = highly original &nbsp;&middot;&nbsp; 10 = very repetitive</span>
+      </div>
+      <!-- Bar fill width and colour class are set dynamically by renderAnalysis() -->
+      <div class="score-bar">
+        <div class="score-bar__fill" id="score-bar-fill"></div>
+      </div>
+    </div>
+
+    <!-- REPEATED THEMES — what angles are already common on LinkedIn -->
+    <h2 class="analysis-heading" id="repeated-heading">What's already been said</h2>
+    <ul class="repeated-list" id="repeated-list">
+      <!-- Injected by renderAnalysis() as .repeated-pill <li> items -->
+    </ul>
+
+    <!-- SUGGESTIONS — three cards each with a rewrite angle -->
+    <h2 class="analysis-heading">Ways to stand out</h2>
+    <div class="suggestions-list" id="suggestions-list">
+      <!-- Injected by renderAnalysis() as .suggestion-card <div> items -->
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       REWRITE OUTPUT SECTION — Hidden until renderRewriteOutput()
+       populates it after the user clicks "Accept and rewrite" on a
+       suggestion card. Contains the rewritten post textarea + actions.
+       ============================================================ -->
+  <section id="rewrite-output-section" hidden>
+    <!-- Label, textarea, and action buttons injected by renderRewriteOutput() in popup.js -->
+  </section>
+
+  <!-- ============================================================
+       RESULTS AREA — Hidden until a full originality check completes.
+       Shows verdict, score, and matched web sources. (Phase 4+)
+       ============================================================ -->
+  <section class="results-area" id="results-area" hidden>
+
+    <!-- Verdict banner — colour-coded: green (original), amber (similar), red (copied) -->
+    <div class="verdict" id="verdict">
+      <span class="verdict__label" id="verdict-label"></span>
+      <span class="verdict__score" id="verdict-score"></span>
+    </div>
+
+    <!-- Summary paragraph explaining the verdict in plain English -->
+    <p class="results-area__summary" id="results-summary"></p>
+
+    <!-- List of matching sources found by the web search -->
+    <div class="sources" id="sources">
+      <h2 class="sources__heading">Similar Sources Found</h2>
+      <ul class="sources__list" id="sources-list"></ul>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       ERROR AREA — Legacy results-level error display. (Phase 4+)
+       ============================================================ -->
+  <section class="error-area" id="error-area" hidden>
+    <p class="error-area__message" id="error-message"></p>
+    <button class="btn-retry" id="btn-retry">Try Again</button>
+  </section>
+
+  <!-- ============================================================
+       PANEL FOOTER — Always visible at the bottom of the panel.
+       Left: lock icon + storage notice. Right: Reset link.
+       ============================================================ -->
+  <footer class="panel-footer">
+    <span class="panel-footer__left">
+      <!-- Simple lock SVG — 12×14 viewbox, no external deps -->
+      <svg class="panel-footer__lock-icon" width="11" height="13" viewBox="0 0 11 13"
+           fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1" y="5.5" width="9" height="7" rx="1.5" stroke="#aaa" stroke-width="1.4"/>
+        <path d="M3 5.5V3.5a2.5 2.5 0 0 1 5 0v2" stroke="#aaa" stroke-width="1.4"
+              stroke-linecap="round"/>
+      </svg>
+      Keys stored locally
+    </span>
+    <button class="panel-footer__reset" id="btn-footer-reset">Reset</button>
+  </footer>
+
+  <!-- popup.js is loaded as a module so it can use ES module imports -->
+  <script src="popup.js" type="module"></script>
+
+</body>
+</html>

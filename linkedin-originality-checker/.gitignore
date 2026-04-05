@@ -1,0 +1,49 @@
+# ============================================================
+# .gitignore — LinkedIn Thought Partner
+# Tells Git which files to never track or commit
+# ============================================================
+
+# Node dependencies (if any build tools are added later)
+node_modules/
+
+# Environment variable files — never commit secrets
+.env
+.env.*
+
+# Any file with 'secret' or 'key' in the name
+*secret*
+*key*
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor/IDE folders
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Build output (if a bundler is added later)
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Chrome Extension package (generated, not source)
+*.crx
+*.pem
+*.zip
+
+# Build script output
+build.sh

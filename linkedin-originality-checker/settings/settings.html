@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Thought Partner — Settings</title>
+  <link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       PAGE HEADER — LinkedIn blue bar with back arrow and title
+       ============================================================ -->
+  <header class="header">
+    <!-- Back arrow closes this tab and returns to the popup -->
+    <button class="header__back-btn" id="btn-back" title="Close settings">
+      &#8592;
+    </button>
+    <div class="header__text">
+      <h1 class="header__title">Settings</h1>
+      <p class="header__subtitle">LinkedIn Thought Partner</p>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ============================================================
+         API KEY FORM — Two fields: Gemini and Serper
+         Keys are stored in Chrome's local storage (never sent anywhere
+         except directly to each respective API)
+         ============================================================ -->
+    <form class="settings-form" id="settings-form" novalidate>
+
+      <!-- Gemini API key input -->
+      <div class="field-group">
+        <label class="field-group__label" for="input-gemini-key">
+          Gemini API Key
+        </label>
+        <p class="field-group__hint">
+          Get yours free at aistudio.google.com — used to extract keywords from posts.
+        </p>
+        <div class="field-group__input-row">
+          <input
+            class="field-group__input"
+            id="input-gemini-key"
+            type="password"
+            placeholder="Paste your Gemini API key here"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <!-- Show/hide toggle so users can verify the key they pasted -->
+          <button type="button" class="btn-reveal" data-target="input-gemini-key" title="Show key">
+            &#128065;
+          </button>
+        </div>
+        <!-- Inline validation error — shown only if field is empty on save -->
+        <p class="field-group__error" id="error-gemini" hidden>
+          Please enter your Gemini API key before saving.
+        </p>
+      </div>
+
+      <!-- Serper API key input -->
+      <div class="field-group">
+        <label class="field-group__label" for="input-serper-key">
+          Serper API Key
+        </label>
+        <p class="field-group__hint">
+          Get yours free at serper.dev — used to search the web for matching content.
+        </p>
+        <div class="field-group__input-row">
+          <input
+            class="field-group__input"
+            id="input-serper-key"
+            type="password"
+            placeholder="Paste your Serper API key here"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" class="btn-reveal" data-target="input-serper-key" title="Show key">
+            &#128065;
+          </button>
+        </div>
+        <p class="field-group__error" id="error-serper" hidden>
+          Please enter your Serper API key before saving.
+        </p>
+      </div>
+
+      <!-- Save button row and success confirmation -->
+      <div class="form-footer">
+        <button type="submit" class="btn-save" id="btn-save">
+          Save
+        </button>
+        <!-- Shown for 2 seconds after a successful save, then hidden -->
+        <p class="save-confirmation" id="save-confirmation" hidden>
+          &#10003; Saved
+        </p>
+      </div>
+
+    </form>
+
+    <!-- ============================================================
+         DANGER ZONE — Lets the user wipe all stored keys
+         ============================================================ -->
+    <section class="danger-zone">
+      <h2 class="danger-zone__heading">Danger Zone</h2>
+      <p class="danger-zone__description">
+        Permanently removes all stored API keys from this browser.
+        You will need to re-enter them to use the extension again.
+      </p>
+      <button class="btn-clear" id="btn-clear">
+        Clear All Keys
+      </button>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER — Privacy reassurance note
+       ============================================================ -->
+  <footer class="footer">
+    <p class="footer__note">
+      &#128274; Keys are saved locally in your browser only &mdash; never sent anywhere.
+    </p>
+  </footer>
+
+  <script src="settings.js" type="module"></script>
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+/* ============================================================
+   FILE: settings.css
+   PURPOSE: All visual styles for the API key settings page
+   ============================================================ */
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 480px;
+  max-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background-color: #f5f5f5;
+}
+
+/* ============================================================
+   HEADER — LinkedIn blue bar with back arrow and title
+   ============================================================ */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #0a66c2;
+  color: #ffffff;
+}
+
+/* Back arrow button — closes the settings tab */
+.header__back-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.header__back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header__title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.header__subtitle {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+/* ============================================================
+   MAIN CONTENT AREA
+   ============================================================ */
+.main {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ============================================================
+   SETTINGS FORM — White card containing both key fields
+   ============================================================ */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Individual field group: label + hint + input row + error */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-group__label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+
+.field-group__hint {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.4;
+}
+
+/* Row that holds the input and the show/hide toggle side by side */
+.field-group__input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-group__input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: monospace;
+  color: #1a1a1a;
+  background-color: #fafafa;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.field-group__input:focus {
+  border-color: #0a66c2;
+  background-color: #ffffff;
+}
+
+/* Show/hide toggle button sits to the right of each input */
+.btn-reveal {
+  background: none;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease;
+}
+
+.btn-reveal:hover {
+  border-color: #0a66c2;
+}
+
+/* Inline validation error — hidden by default, shown on failed save */
+.field-group__error {
+  font-size: 12px;
+  color: #c0392b;
+}
+
+/* ============================================================
+   FORM FOOTER — Save button + success confirmation
+   ============================================================ */
+.form-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.btn-save {
+  padding: 10px 28px;
+  background-color: #0a66c2;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-save:hover {
+  background-color: #004182;
+}
+
+/* Green confirmation message — fades in after a successful save */
+.save-confirmation {
+  font-size: 13px;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+/* ============================================================
+   DANGER ZONE — Destructive key-clearing section
+   ============================================================ */
+.danger-zone {
+  background-color: #ffffff;
+  border: 1.5px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.danger-zone__heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #721c24;
+}
+
+.danger-zone__description {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.btn-clear {
+  align-self: flex-start;
+  padding: 8px 18px;
+  background-color: transparent;
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid #c0392b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-clear:hover {
+  background-color: #c0392b;
+  color: #ffffff;
+}
+
+/* ============================================================
+   FOOTER — Privacy reassurance note pinned to the bottom
+   ============================================================ */
+.footer {
+  padding: 14px 24px;
+  border-top: 1px solid #e8e8e8;
+  background-color: #ffffff;
+}
+
+.footer__note {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  line-height: 1.4;
+}

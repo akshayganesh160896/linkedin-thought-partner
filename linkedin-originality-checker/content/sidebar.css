@@ -1,0 +1,913 @@
+/* ============================================================
+   FILE: sidebar.css
+   PURPOSE: Styles for the permanent injected sidebar panel.
+   All selectors are scoped under #loc-sidebar or .loc-mini-tab
+   so they never leak into the host page's own styles.
+   USED BY: content/sidebar.js (injected via manifest content_scripts)
+   ============================================================ */
+
+
+/* ============================================================
+   SIDEBAR CONTAINER
+   Fixed to the right edge of the viewport, full viewport height.
+   Width transitions between 400px (expanded) and 40px (minimized).
+   ============================================================ */
+#loc-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 400px;
+  background-color: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.12);
+  z-index: 2147483647; /* maximum possible z-index — appears above all page content */
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  overflow: hidden;
+  box-sizing: border-box;
+  /* Width transition shared by both expand and minimize animations */
+  transition: width 220ms ease;
+}
+
+/* Ensure all children use border-box so padding never breaks widths */
+#loc-sidebar *, #loc-sidebar *::before, #loc-sidebar *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* The HTML [hidden] attribute must always win over any display rule */
+#loc-sidebar [hidden] { display: none !important; }
+
+
+/* ============================================================
+   STATE CLASSES
+   Applied by JS to drive the width transition animation.
+   loc-expanded  = full 400px sidebar
+   loc-minimized = only the 40px tab visible (content hidden via JS)
+   ============================================================ */
+#loc-sidebar.loc-expanded  { width: 400px; }
+#loc-sidebar.loc-minimized { width: 40px; }
+
+
+/* ============================================================
+   MINIMIZED TAB
+   The thin blue strip visible when the sidebar is minimized.
+   Injected as a sibling element, not inside #loc-sidebar.
+   ============================================================ */
+.loc-mini-tab {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100vh;
+  background-color: #0a66c2;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.loc-mini-tab:hover {
+  background-color: #1a7ad4;
+}
+
+/* Right-pointing arrow at the top of the minimized tab */
+.loc-mini-tab__arrow {
+  color: #ffffff;
+  font-size: 18px;
+  padding: 14px 0 10px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Rotated label — "Thought Partner" centred vertically */
+.loc-mini-tab__label {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  margin-top: 60px;
+  user-select: none;
+}
+
+
+/* ============================================================
+   SCROLLABLE BODY
+   The region below the header that holds all scan UI.
+   Scrolls independently so the header always stays visible.
+   ============================================================ */
+#loc-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Thin, muted scrollbar matching panel colour scheme */
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+
+#loc-sidebar-body::-webkit-scrollbar { width: 4px; }
+#loc-sidebar-body::-webkit-scrollbar-track { background: transparent; }
+#loc-sidebar-body::-webkit-scrollbar-thumb { background-color: #d0d0d0; border-radius: 4px; }
+#loc-sidebar-body::-webkit-scrollbar-thumb:hover { background-color: #aaa; }
+
+
+/* ============================================================
+   HEADER
+   LinkedIn-blue bar with title and control buttons.
+   ============================================================ */
+#loc-sidebar .loc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px;
+  background-color: #0a66c2;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+#loc-sidebar .loc-header__title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+#loc-sidebar .loc-header__controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Individual header icon buttons — minimize (—) and settings (⚙) */
+#loc-sidebar .loc-header__btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+#loc-sidebar .loc-header__btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Status dot on the settings button */
+#loc-sidebar .loc-key-status-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+#loc-sidebar .loc-key-status-dot--green  { background-color: #4caf50; }
+#loc-sidebar .loc-key-status-dot--yellow { background-color: #ffc107; }
+
+
+/* ============================================================
+   "LAST SCAN" BANNER
+   Shown when session state is restored after navigation.
+   ============================================================ */
+#loc-sidebar .loc-last-scan-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 12px 0;
+  padding: 7px 10px;
+  background-color: #e8f0fb;
+  border: 1px solid #b3c9f0;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #0a66c2;
+  font-weight: 500;
+}
+
+#loc-sidebar .loc-last-scan-banner__dismiss {
+  background: none;
+  border: none;
+  color: #0a66c2;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+#loc-sidebar .loc-last-scan-banner__dismiss:hover { opacity: 1; }
+
+
+/* ============================================================
+   NOTIFICATION BANNERS
+   Info (blue), error (red), warning (yellow), success (green).
+   Each is a flex row with a message and an × dismiss button.
+   ============================================================ */
+#loc-sidebar .loc-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 12px 0;
+  padding: 8px 8px 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#loc-sidebar .loc-banner--info    { background: #e3f2fd; border: 1px solid #90caf9; color: #1565c0; }
+#loc-sidebar .loc-banner--error   { background: #fdecea; border: 1px solid #f5c6cb; color: #721c24; }
+#loc-sidebar .loc-banner--warning { background: #fff8e1; border: 1px solid #ffe082; color: #795548; }
+#loc-sidebar .loc-banner--success { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+
+#loc-sidebar .loc-banner__message { flex: 1; }
+
+#loc-sidebar .loc-banner__dismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.7;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: opacity 0.15s ease;
+}
+
+#loc-sidebar .loc-banner__dismiss:hover { opacity: 1; }
+
+#loc-sidebar .loc-banner a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   DRAFT SECTION
+   Label + textarea for the post draft input.
+   ============================================================ */
+#loc-sidebar .loc-draft-section {
+  padding: 12px 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#loc-sidebar .loc-draft-section__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#loc-sidebar .loc-draft-section__textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1a1a1a;
+  background-color: #fafafa;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+  transition: border-color 0.15s ease;
+}
+
+#loc-sidebar .loc-draft-section__textarea:focus {
+  border-color: #0a66c2;
+  background-color: #ffffff;
+}
+
+#loc-sidebar .loc-draft-section__textarea::placeholder { color: #aaa; }
+
+
+/* ============================================================
+   ACTION AREA — Scan button
+   ============================================================ */
+#loc-sidebar .loc-action-area {
+  padding: 10px 12px 12px;
+}
+
+#loc-sidebar .loc-btn-check {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #0a66c2;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+#loc-sidebar .loc-btn-check:hover:not(:disabled) { background-color: #004182; }
+
+#loc-sidebar .loc-btn-check:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Loading state — spinner via ::after pseudo-element */
+#loc-sidebar .loc-btn-check--loading {
+  position: relative;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+#loc-sidebar .loc-btn-check--loading::after {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  top: 50%;
+  left: 50%;
+  margin: -7.5px 0 0 -7.5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: loc-spin 0.7s linear infinite;
+}
+
+@keyframes loc-spin { to { transform: rotate(360deg); } }
+
+
+/* ============================================================
+   KEYWORDS SECTION
+   ============================================================ */
+#loc-sidebar .loc-keywords-section {
+  padding: 0 12px 12px;
+  border-top: 1px solid #e8e8e8;
+}
+
+#loc-sidebar .loc-keywords-section__heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 10px 0 7px;
+}
+
+#loc-sidebar .loc-keywords-section__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+#loc-sidebar .loc-keyword-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  background-color: #e8f0fb;
+  color: #0a66c2;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+#loc-sidebar .loc-keyword-pill__text {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#loc-sidebar .loc-keyword-pill__remove {
+  background: none;
+  border: none;
+  color: #0a66c2;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.1s ease;
+}
+
+#loc-sidebar .loc-keyword-pill__remove:hover { opacity: 1; }
+
+#loc-sidebar .loc-keyword-pill--add {
+  background-color: #f0f0f0;
+  color: #555;
+  cursor: pointer;
+  border: 1.5px dashed #ccc;
+  transition: background-color 0.15s ease;
+}
+
+#loc-sidebar .loc-keyword-pill--add:hover {
+  background-color: #e8f0fb;
+  border-color: #0a66c2;
+  color: #0a66c2;
+}
+
+#loc-sidebar .loc-keyword-pill__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: inherit;
+  color: #1a1a1a;
+  width: 90px;
+}
+
+
+/* ============================================================
+   TIME WINDOW SELECTOR
+   ============================================================ */
+#loc-sidebar .loc-time-window {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+#loc-sidebar .loc-time-window__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+  flex-shrink: 0;
+}
+
+#loc-sidebar .loc-time-window__buttons { display: flex; gap: 4px; }
+
+#loc-sidebar .loc-time-window__btn {
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 20px;
+  background: none;
+  color: #555;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+#loc-sidebar .loc-time-window__btn:hover {
+  border-color: #0a66c2;
+  color: #0a66c2;
+}
+
+#loc-sidebar .loc-time-window__btn--active {
+  background-color: #0a66c2;
+  border-color: #0a66c2;
+  color: #ffffff;
+}
+
+#loc-sidebar .loc-time-window__btn--active:hover {
+  background-color: #004182;
+  border-color: #004182;
+}
+
+
+/* ============================================================
+   SEARCH RESULTS SECTION
+   ============================================================ */
+#loc-sidebar .loc-search-results-section {
+  padding: 0 12px 12px;
+  border-top: 1px solid #e8e8e8;
+}
+
+#loc-sidebar .loc-search-results-section__header {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 10px 0 8px;
+}
+
+#loc-sidebar .loc-search-results-section__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+#loc-sidebar .loc-search-results-section__count {
+  font-size: 11px;
+  color: #aaa;
+}
+
+#loc-sidebar .loc-search-results-scroll-wrapper { position: relative; }
+
+#loc-sidebar .loc-search-results-scroll-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, #ffffff);
+  pointer-events: none;
+  border-radius: 0 0 6px 6px;
+}
+
+#loc-sidebar .loc-search-results-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-bottom: 28px;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+
+#loc-sidebar .loc-search-results-scroll::-webkit-scrollbar { width: 4px; }
+#loc-sidebar .loc-search-results-scroll::-webkit-scrollbar-thumb {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+}
+
+#loc-sidebar .loc-search-result-card {
+  padding: 9px 11px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #0a66c2;
+  transition: border-left-color 0.15s ease;
+}
+
+#loc-sidebar .loc-search-result-card:hover { border-left-color: #004182; }
+
+#loc-sidebar .loc-search-result-card__label {
+  display: inline-block;
+  padding: 2px 7px;
+  background-color: #e8f0fb;
+  color: #0a66c2;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#loc-sidebar .loc-search-result-card__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#loc-sidebar .loc-search-result-card__snippet {
+  font-size: 11px;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* "Open post →" navigates in the same tab (sidebar persists across navigation) */
+#loc-sidebar .loc-search-result-card__link {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 500;
+  color: #0a66c2;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+#loc-sidebar .loc-search-result-card__link:hover { text-decoration: underline; }
+
+
+/* ============================================================
+   SEARCH STATUS LINE
+   ============================================================ */
+#loc-sidebar .loc-search-status {
+  margin: 8px 12px 0;
+  font-size: 12px;
+  color: #555;
+  font-style: italic;
+}
+
+
+/* ============================================================
+   ANALYSIS SECTION — SVG gauge, repeated themes, suggestion cards
+   ============================================================ */
+#loc-sidebar .loc-analysis-section {
+  padding: 0 12px 12px;
+  border-top: 1px solid #e8e8e8;
+}
+
+#loc-sidebar .loc-analysis-score { margin: 12px 0 10px; }
+
+/* ── SVG gauge container ─────────────────────────────────────── */
+#loc-sidebar .loc-gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0 0;
+}
+
+/* Smaller variant used in the rewrite estimated-score section */
+#loc-sidebar .loc-gauge-container--small .loc-gauge {
+  width: 110px;
+  height: auto;
+}
+
+#loc-sidebar .loc-gauge {
+  width: 140px;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* The animated coloured arc — transition applied by JS after first paint */
+#loc-sidebar .loc-gauge__fill {
+  /* stroke-dashoffset transition is set inline by renderGauge() */
+}
+
+/* Large score number centred inside the gauge arc */
+#loc-sidebar .loc-gauge__score {
+  font-size: 32px;
+  font-weight: 800;
+  fill: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#loc-sidebar .loc-gauge__subscale {
+  font-size: 11px;
+  fill: #999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#loc-sidebar .loc-gauge__label {
+  font-size: 10px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+}
+
+/* ── Estimated gauge wrap (inside rewrite section) ───────────── */
+#loc-sidebar .loc-est-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 8px;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 10px;
+}
+
+#loc-sidebar .loc-analysis-heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 12px 0 7px;
+}
+
+#loc-sidebar .loc-repeated-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+#loc-sidebar .loc-repeated-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #444;
+  line-height: 1.4;
+}
+
+#loc-sidebar .loc-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+#loc-sidebar .loc-suggestion-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e4e6e8;
+  border-radius: 7px;
+  padding: 11px;
+}
+
+#loc-sidebar .loc-suggestion-card__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+#loc-sidebar .loc-suggestion-card__explanation {
+  font-size: 11px;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+#loc-sidebar .loc-suggestion-card__new-angle {
+  font-size: 11px;
+  color: #1a1a1a;
+  background-color: #eaf6f1;
+  border-left: 3px solid #1D9E75;
+  border-radius: 0 4px 4px 0;
+  padding: 5px 9px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+#loc-sidebar .loc-suggestion-card__accept {
+  display: block;
+  width: 100%;
+  padding: 7px 0;
+  background-color: #1D9E75;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.15s ease;
+}
+
+#loc-sidebar .loc-suggestion-card__accept:hover { background-color: #158a63; }
+#loc-sidebar .loc-suggestion-card__accept:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+/* ============================================================
+   REWRITE OUTPUT SECTION
+   ============================================================ */
+#loc-sidebar .loc-rewrite-output-section {
+  padding: 12px 12px 14px;
+  border-top: 1px solid #e8e8e8;
+}
+
+#loc-sidebar .loc-rewrite-output__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 7px;
+}
+
+#loc-sidebar .loc-rewrite-output__textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #1a1a1a;
+  background-color: #fafafa;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+  min-height: 100px;
+  cursor: text;
+  margin-bottom: 9px;
+}
+
+#loc-sidebar .loc-rewrite-output__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#loc-sidebar .loc-btn-copy {
+  width: 100%;
+  padding: 8px 0;
+  background-color: #1D9E75;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+#loc-sidebar .loc-btn-copy:hover { background-color: #158a63; }
+
+#loc-sidebar .loc-btn-try-again {
+  width: 100%;
+  padding: 7px 0;
+  background-color: transparent;
+  color: #555;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+#loc-sidebar .loc-btn-try-again:hover { border-color: #aaa; color: #333; }
+
+#loc-sidebar .loc-btn-start-over {
+  width: 100%;
+  padding: 5px 0;
+  background-color: transparent;
+  color: #aaa;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+#loc-sidebar .loc-btn-start-over:hover { color: #555; }
+
+
+/* ============================================================
+   PANEL FOOTER
+   Lock icon + "Keys stored locally" on left, Reset link on right.
+   ============================================================ */
+#loc-sidebar .loc-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid #e8e8e8;
+  background-color: #fafafa;
+  flex-shrink: 0;
+}
+
+#loc-sidebar .loc-panel-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+#loc-sidebar .loc-panel-footer__reset {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #0a66c2;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+#loc-sidebar .loc-panel-footer__reset:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   SECTION REVEAL ANIMATION
+   Sections start invisible; JS adds loc-section-visible to animate in.
+   ============================================================ */
+#loc-sidebar .loc-animatable {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+#loc-sidebar .loc-section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

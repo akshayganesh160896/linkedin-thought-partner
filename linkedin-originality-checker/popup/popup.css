@@ -1,0 +1,1136 @@
+/* ============================================================
+   FILE: popup.css
+   PURPOSE: All visual styles for the extension popup panel
+   ============================================================ */
+
+/* ============================================================
+   RESET & BASE
+   Normalise browser defaults so the popup looks consistent
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure the HTML hidden attribute always wins over any display rule —
+   class selectors like .error-banner { display: flex } would otherwise
+   override the user-agent stylesheet's [hidden] { display: none } */
+[hidden] { display: none !important; }
+
+body {
+  width: 400px;
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background-color: #ffffff;
+}
+
+/* ============================================================
+   HEADER
+   Title bar with settings button on the right
+   ============================================================ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background-color: #0a66c2; /* LinkedIn blue */
+  color: #ffffff;
+}
+
+.header__title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.header__settings-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  /* position: relative lets the status dot be positioned inside the button */
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+.header__settings-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================
+   API KEY WARNING BANNER
+   Yellow bar shown when one or both API keys are not yet set
+   ============================================================ */
+.keys-warning {
+  margin: 10px 16px 0;
+  padding: 9px 12px;
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 6px;
+}
+
+.keys-warning__message {
+  font-size: 12px;
+  color: #795548;
+  line-height: 1.4;
+}
+
+.keys-warning__link {
+  color: #795548;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.keys-warning__link:hover {
+  color: #4e342e;
+}
+
+/* ============================================================
+   ERROR BANNER
+   Red dismissable bar shown at the top of the panel when
+   keyword extraction (or any step) fails
+   ============================================================ */
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 16px 0;
+  padding: 9px 10px 9px 12px;
+  background-color: #fdecea;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+}
+
+.error-banner__message {
+  flex: 1;
+  font-size: 12px;
+  color: #721c24;
+  line-height: 1.4;
+}
+
+.error-banner__dismiss {
+  background: none;
+  border: none;
+  color: #721c24;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.error-banner__dismiss:hover {
+  opacity: 1;
+}
+
+/* ============================================================
+   DRAFT SECTION
+   Textarea for pasting the LinkedIn post draft
+   ============================================================ */
+.draft-section {
+  padding: 14px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.draft-section__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.draft-section__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1a1a1a;
+  background-color: #fafafa;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+  transition: border-color 0.15s ease;
+}
+
+.draft-section__textarea:focus {
+  border-color: #0a66c2;
+  background-color: #ffffff;
+}
+
+.draft-section__textarea::placeholder {
+  color: #aaa;
+}
+
+/* ============================================================
+   ACTION AREA
+   Holds the primary "Scan" button
+   ============================================================ */
+.action-area {
+  padding: 10px 16px 14px;
+}
+
+.btn-check {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #0a66c2;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-check:hover:not(:disabled) {
+  background-color: #004182;
+}
+
+.btn-check:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Loading state — button text is replaced by JS; spinner via ::after */
+.btn-check--loading {
+  position: relative;
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+
+.btn-check--loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   KEYWORDS SECTION
+   Shown after successful extraction — pills + add pill
+   ============================================================ */
+.keywords-section {
+  padding: 0 16px 14px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.keywords-section__heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 12px 0 8px;
+}
+
+/* Pill container — wraps when keywords exceed one line */
+.keywords-section__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Base pill style shared by keyword pills and the + Add pill */
+.keyword-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background-color: #e8f0fb;
+  color: #0a66c2;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.keyword-pill__text {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* × remove button inside each keyword pill */
+.keyword-pill__remove {
+  background: none;
+  border: none;
+  color: #0a66c2;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.1s ease;
+}
+
+.keyword-pill__remove:hover {
+  opacity: 1;
+}
+
+/* + Add pill — styled differently to signal it's interactive, not a keyword */
+.keyword-pill--add {
+  background-color: #f0f0f0;
+  color: #555;
+  cursor: pointer;
+  border: 1.5px dashed #ccc;
+  transition: background-color 0.15s ease;
+}
+
+.keyword-pill--add:hover {
+  background-color: #e8f0fb;
+  border-color: #0a66c2;
+  color: #0a66c2;
+}
+
+/* Inline text input that appears inside the + Add pill on click */
+.keyword-pill__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: inherit;
+  color: #1a1a1a;
+  width: 110px;
+}
+
+/* ============================================================
+   TIME WINDOW SELECTOR
+   Three toggle buttons inside the keywords section letting the
+   user control how far back the LinkedIn search looks
+   ============================================================ */
+.time-window {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.time-window__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.time-window__buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.time-window__btn {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 20px;
+  background: none;
+  color: #555;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.time-window__btn:hover {
+  border-color: #0a66c2;
+  color: #0a66c2;
+}
+
+/* Active state — the currently selected time window */
+.time-window__btn--active {
+  background-color: #0a66c2;
+  border-color: #0a66c2;
+  color: #ffffff;
+}
+
+.time-window__btn--active:hover {
+  background-color: #004182;
+  border-color: #004182;
+  color: #ffffff;
+}
+
+/* ============================================================
+   SEARCH STATUS LINE
+   One-line summary shown below the keywords section after the
+   Serper search completes: "Found X posts across Y searches"
+   ============================================================ */
+.search-status {
+  margin: 10px 16px 0;
+  font-size: 12px;
+  color: #555;
+  font-style: italic;
+}
+
+/* ============================================================
+   NO-RESULTS WARNING
+   Yellow banner shown when all Serper queries return zero posts
+   ============================================================ */
+.no-results-warning {
+  margin: 10px 16px 0;
+  padding: 9px 12px;
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 6px;
+}
+
+.no-results-warning__message {
+  font-size: 12px;
+  color: #795548;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   ANALYSIS SECTION
+   Revealed after analyzeOriginality() completes — score, repeated
+   themes, and suggestion cards
+   ============================================================ */
+.analysis-section {
+  padding: 0 16px 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* Score header row — large number + scale + label on one line */
+.analysis-score {
+  margin: 14px 0 12px;
+}
+
+.analysis-score__header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* The big bold number — visual anchor for the whole analysis */
+.analysis-score__number {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  color: #1a1a1a;
+}
+
+.analysis-score__scale {
+  font-size: 18px;
+  font-weight: 600;
+  color: #999;
+}
+
+.analysis-score__label {
+  font-size: 11px;
+  color: #999;
+  margin-left: 2px;
+}
+
+/* Score bar track */
+.score-bar {
+  height: 8px;
+  background-color: #e8e8e8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Animated fill — width and colour class applied by JS */
+.score-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.score-bar__fill--green { background-color: #1D9E75; }
+.score-bar__fill--amber { background-color: #F59E0B; }
+.score-bar__fill--red   { background-color: #EF4444; }
+
+/* Shared heading style for "What's already been said" and "Ways to stand out" */
+.analysis-heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 14px 0 8px;
+}
+
+/* Repeated themes list — displayed as small grey pills */
+.repeated-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.repeated-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #444;
+  line-height: 1.4;
+}
+
+/* Suggestion cards stack vertically */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggestion-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e4e6e8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Title — short bold label at the top of each card */
+.suggestion-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+
+/* Explanation — what to change, in muted text */
+.suggestion-card__explanation {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 7px;
+}
+
+/* New angle — the specific reframe, highlighted with a subtle green tint */
+.suggestion-card__new-angle {
+  font-size: 12px;
+  color: #1a1a1a;
+  background-color: #eaf6f1;
+  border-left: 3px solid #1D9E75;
+  border-radius: 0 4px 4px 0;
+  padding: 6px 10px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+/* Accept button — green, full width, copies the new angle into the textarea */
+.suggestion-card__accept {
+  display: block;
+  width: 100%;
+  padding: 7px 0;
+  background-color: #1D9E75;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.15s ease;
+}
+
+.suggestion-card__accept:hover {
+  background-color: #158a63;
+}
+
+/* ============================================================
+   RESULTS AREA
+   Revealed after a successful originality check (Phase 4+)
+   ============================================================ */
+.results-area {
+  padding: 0 16px 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.verdict {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin: 14px 0 10px;
+}
+
+.verdict__label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.verdict__score {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.verdict--original  { background-color: #d4edda; color: #155724; }
+.verdict--similar   { background-color: #fff3cd; color: #856404; }
+.verdict--copied    { background-color: #f8d7da; color: #721c24; }
+
+.results-area__summary {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 14px;
+}
+
+.sources__heading {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.sources__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sources__list li {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sources__list a {
+  color: #0a66c2;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.sources__list a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   ERROR AREA — Legacy results-level error (Phase 4+)
+   ============================================================ */
+.error-area {
+  padding: 14px 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.error-area__message {
+  font-size: 13px;
+  color: #721c24;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.btn-retry {
+  width: 100%;
+  padding: 8px 0;
+  background-color: transparent;
+  color: #0a66c2;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid #0a66c2;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-retry:hover {
+  background-color: #f0f6ff;
+}
+
+/* ============================================================
+   SEARCH RESULTS SECTION — Phase 6
+   Cards showing deduplicated LinkedIn posts found by Serper.
+   Appears between the keyword pills and the originality score.
+   ============================================================ */
+#search-results-section {
+  padding: 0 16px 14px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.search-results-section__header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 12px 0 10px;
+}
+
+.search-results-section__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+.search-results-section__count {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* Relative wrapper provides context for the fade-out overlay */
+.search-results-scroll-wrapper {
+  position: relative;
+}
+
+/* Fade gradient at the bottom edge hints that more cards exist below */
+.search-results-scroll-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, #ffffff);
+  pointer-events: none;
+  border-radius: 0 0 6px 6px;
+}
+
+/* Scrollable inner list — caps height and stacks cards with a gap */
+.search-results-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Extra bottom padding so the last card clears the fade overlay */
+  padding-bottom: 32px;
+}
+
+/* Individual result card */
+.search-result-card {
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #0a66c2;
+  transition: border-left-color 0.15s ease;
+}
+
+.search-result-card:hover {
+  border-left-color: #004182;
+}
+
+/* "LinkedIn" label pill in the top-left corner of each card */
+.search-result-card__label {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #e8f0fb;
+  color: #0a66c2;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Post title — bold, clamped to 2 lines */
+.search-result-card__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Snippet — muted, clamped to 3 lines */
+.search-result-card__snippet {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* "View post →" link — small, right-aligned */
+.search-result-card__link {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 500;
+  color: #0a66c2;
+  text-decoration: none;
+}
+
+.search-result-card__link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   REWRITE OUTPUT SECTION — Phase 6
+   Shown below suggestion cards after a successful AI rewrite.
+   Contains the finished post textarea and action buttons.
+   ============================================================ */
+#rewrite-output-section {
+  padding: 14px 16px 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* Small uppercase label above the textarea */
+.rewrite-output__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+/* Read-only textarea — same visual language as the draft textarea */
+.rewrite-output__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1a1a1a;
+  background-color: #fafafa;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+  min-height: 120px;
+  cursor: text;
+  margin-bottom: 10px;
+}
+
+/* Three action buttons stacked vertically below the textarea */
+.rewrite-output__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Copy to clipboard — primary green action */
+.btn-copy {
+  width: 100%;
+  padding: 9px 0;
+  background-color: #1D9E75;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-copy:hover {
+  background-color: #158a63;
+}
+
+/* Try a different suggestion — muted outline style */
+.btn-try-again {
+  width: 100%;
+  padding: 8px 0;
+  background-color: transparent;
+  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-try-again:hover {
+  border-color: #aaa;
+  color: #333;
+}
+
+/* Start over — ghost text link style, least prominent */
+.btn-start-over {
+  width: 100%;
+  padding: 6px 0;
+  background-color: transparent;
+  color: #aaa;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.btn-start-over:hover {
+  color: #555;
+}
+
+/* ============================================================
+   PHASE 7 — KEY STATUS DOT
+   Small dot inside the settings button coloured by init() to
+   signal whether both API keys are configured (green) or not (yellow)
+   ============================================================ */
+.key-status-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  /* No colour by default — colour class is added by JS in init() */
+}
+
+.key-status-dot--green  { background-color: #4caf50; }
+.key-status-dot--yellow { background-color: #ffc107; }
+
+/* ============================================================
+   PHASE 7 — INFO BANNER
+   Soft blue tip shown when the current tab is not linkedin.com.
+   Dismissable with an × button; matches the red error-banner shape.
+   ============================================================ */
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 16px 0;
+  padding: 9px 10px 9px 12px;
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 6px;
+}
+
+.info-banner__message {
+  flex: 1;
+  font-size: 12px;
+  color: #1565c0;
+  line-height: 1.4;
+}
+
+.info-banner__dismiss {
+  background: none;
+  border: none;
+  color: #1565c0;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.info-banner__dismiss:hover { opacity: 1; }
+
+/* ============================================================
+   PHASE 7 — WARNING BANNER
+   Yellow dismissable banner for non-critical issues.
+   Same layout as error-banner, different colour palette.
+   ============================================================ */
+.warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 16px 0;
+  padding: 9px 10px 9px 12px;
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 6px;
+}
+
+.warning-banner__message {
+  flex: 1;
+  font-size: 12px;
+  color: #795548;
+  line-height: 1.4;
+}
+
+.warning-banner__dismiss {
+  background: none;
+  border: none;
+  color: #795548;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.warning-banner__dismiss:hover { opacity: 1; }
+
+/* ============================================================
+   PHASE 7 — SUCCESS BANNER
+   Green dismissable banner for confirmations (e.g. copied).
+   Same layout as error-banner, different colour palette.
+   ============================================================ */
+.success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 16px 0;
+  padding: 9px 10px 9px 12px;
+  background-color: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+}
+
+.success-banner__message {
+  flex: 1;
+  font-size: 12px;
+  color: #2e7d32;
+  line-height: 1.4;
+}
+
+.success-banner__dismiss {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.success-banner__dismiss:hover { opacity: 1; }
+
+/* ============================================================
+   PHASE 7 — SECTION REVEAL ANIMATION
+   Animated sections start invisible and 8px below their resting
+   position. JS removes hidden, then adds .section-visible on the
+   next frame to trigger the transition smoothly.
+   ============================================================ */
+#keywords-section,
+#search-results-section,
+#analysis-section,
+#rewrite-output-section {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+/* Applied by revealSection() in popup.js — triggers the fade+slide in */
+.section-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ============================================================
+   PHASE 7 — THIN SCROLLBAR (search results container)
+   Webkit-only; degrades gracefully in other browsers to the
+   default scrollbar which still functions correctly.
+   ============================================================ */
+.search-results-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.search-results-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-results-scroll::-webkit-scrollbar-thumb {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+}
+
+.search-results-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #aaa;
+}
+
+/* ============================================================
+   PHASE 7 — PANEL FOOTER
+   Sticky-to-bottom bar with a storage notice and a Reset link.
+   Sits below all result sections; always visible.
+   ============================================================ */
+.panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  border-top: 1px solid #e8e8e8;
+  background-color: #fafafa;
+}
+
+.panel-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.panel-footer__lock-icon {
+  flex-shrink: 0;
+}
+
+/* "Reset" text link — muted by default, LinkedIn blue on hover */
+.panel-footer__reset {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #0a66c2;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.panel-footer__reset:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   PHASE 7 — MISSING HOVER STATES
+   Any interactive element not already covered in the rules above
+   ============================================================ */
+
+/* Repeated pill — not interactive itself, but ensure cursor is default */
+.repeated-pill {
+  cursor: default;
+}
+
+/* "View post →" link inside search result cards */
+.search-result-card__link:focus-visible {
+  outline: 2px solid #0a66c2;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Ensure all dismiss buttons have a visible focus ring for keyboard nav */
+.error-banner__dismiss:focus-visible,
+.warning-banner__dismiss:focus-visible,
+.success-banner__dismiss:focus-visible,
+.info-banner__dismiss:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
