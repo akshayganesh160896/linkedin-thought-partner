@@ -10,14 +10,19 @@ node_modules/
 .env
 .env.*
 
-# Any file with 'secret' or 'key' in the name
+# Any file with 'secret' or 'key' in the name (but not source files like keywords.js)
 *secret*
 *key*
+!utils/keywords.js
 
 # macOS system files
 .DS_Store
+**/.DS_Store
 .AppleDouble
 .LSOverride
+
+# Claude Code internal folder
+.claude
 
 # Windows system files
 Thumbs.db
