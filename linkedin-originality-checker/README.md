@@ -1,83 +1,97 @@
 # LinkedIn Thought Partner
 
-Your AI-powered LinkedIn writing partner — checks if your post idea is repetitive, finds what's already been said, and rewrites your content to stand out. Paste your draft, click Scan, and the extension extracts key ideas with Google Gemini AI, searches for recent LinkedIn posts on the same topic via Serper, scores how repetitive your draft looks on a 1–10 scale, surfaces the angles that are already overused, and offers three rewritten versions that take a fresher angle — each with a one-click "Accept and rewrite" button and a "Copy to clipboard" action.
+Your AI-powered writing partner for LinkedIn — checks if your post idea is repetitive, finds what's already been said, and rewrites your content to stand out.
+
+`Chrome Extension` | `Manifest V3` | `Free to use`
 
 ---
 
-## Prerequisites
+## What it does
 
-| Requirement | Where to get it |
-|---|---|
-| Google Chrome (desktop) | [chrome.google.com](https://chrome.google.com) |
-| Gemini API key (free tier) | [aistudio.google.com](https://aistudio.google.com) — click **Get API key** |
-| Serper API key (free tier) | [serper.dev](https://serper.dev) — sign up and copy your key from the dashboard |
+- **Checks originality** — scores your draft on a 1–10 scale showing how repetitive it is compared to recent LinkedIn posts
+- **Finds similar content** — searches LinkedIn for posts on the same topic so you can see exactly what's already out there
+- **Extracts key ideas** — uses Gemini AI to pull the core keyword phrases from your draft automatically
+- **Suggests fresh angles** — generates three rewrite directions with specific new angles you can take to stand out
+- **Rewrites your post** — one click on any suggestion rewrites your full draft in your own voice, ready to copy and paste
 
-> **Important:** Use the key from **Google AI Studio**, not the Google Cloud Console. The Cloud Console key has no free tier and will return quota errors immediately.
+---
+
+## How it works
+
+1. **Paste your draft** into the sidebar text area on any page
+2. **Keywords are extracted** from your draft using Google Gemini AI
+3. **LinkedIn is searched** for recent posts on those keywords via Serper
+4. **Originality is scored** — Gemini compares your draft against the results and returns a 1–10 repetitiveness score
+5. **Rewrites are suggested** — three unique angles are offered; accept one and a full rewrite is generated instantly
 
 ---
 
 ## Setup
 
-1. **Clone or download this repository**
-
+1. Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com) — click **Get API key**
+2. Get a free Serper API key at [serper.dev](https://serper.dev) — sign up and copy your key from the dashboard
+3. Download or clone this repo
    ```bash
-   git clone https://github.com/your-username/linkedin-originality-checker.git
+   git clone https://github.com/your-username/linkedin-thought-partner.git
    ```
+4. Open Chrome and go to `chrome://extensions`
+5. Enable **Developer Mode** (toggle, top-right)
+6. Click **Load unpacked** and select this project folder (the one containing `manifest.json`)
+7. Click the extension icon in your toolbar to open the sidebar
+8. Open **Settings** (⚙ icon) and paste both API keys
+9. Click the toolbar icon on any page to open the sidebar and start scanning
 
-2. **Load the extension in Chrome**
-
-   - Open `chrome://extensions`
-   - Enable **Developer mode** (toggle, top-right)
-   - Click **Load unpacked**
-   - Select the `linkedin-originality-checker/` folder (the one that contains `manifest.json`)
-   - The extension icon appears in your Chrome toolbar — pin it for easy access
-
-3. **Add your API keys**
-
-   - Click the extension icon, then click the **⚙ gear** icon (or click the yellow dot if it appears)
-   - Paste your Gemini API key and your Serper API key
-   - Click **Save keys**
-   - The gear icon dot turns green to confirm both keys are stored
-
-4. **Run your first scan**
-
-   - Paste a LinkedIn post draft into the text area
-   - Choose a time window (24 hours / 7 days / 30 days)
-   - Click **Scan**
-   - Results appear in order: extracted keywords → posts found → originality score → rewrite suggestions
+> **Important:** Use the key from **Google AI Studio**, not the Google Cloud Console. The Cloud Console key has no free tier and returns quota errors immediately.
 
 ---
 
-## How to reload after code changes
+## API Keys
 
-Go to `chrome://extensions` and click the **↺ refresh** icon on the extension card. The popup picks up the updated files immediately.
+| Key | Where to get it | Free tier |
+|---|---|---|
+| Gemini API key | [aistudio.google.com](https://aistudio.google.com) | Yes — daily request limit |
+| Serper API key | [serper.dev](https://serper.dev) | Yes — 2,500 searches/month |
+
+Both keys are stored locally in your browser via `chrome.storage.local`. They are never sent anywhere except directly to each respective API endpoint. No server, no tracking, no accounts.
 
 ---
 
-## File structure
+## File Structure
 
-| Path | Role |
+| File / Folder | What it does |
 |---|---|
 | `manifest.json` | Chrome Extension config — MV3 permissions and entry points |
-| `popup/popup.html` | HTML structure of the main popup panel |
-| `popup/popup.css` | All visual styles for the popup |
-| `popup/popup.js` | UI logic, pipeline orchestration, and render functions |
-| `settings/settings.html` | API key configuration page (full-tab) |
-| `settings/settings.css` | Styles for the settings page |
-| `settings/settings.js` | Saves, loads, and clears API keys via Chrome storage |
-| `background/service-worker.js` | Extension lifecycle management (MV3 service worker) |
-| `api/gemini.js` | All calls to the Gemini API — keyword extraction, analysis, rewrite |
-| `api/serper.js` | All calls to the Serper search API |
+| `content/sidebar.js` | The full sidebar UI — state machine, scan pipeline, all render functions |
+| `content/sidebar.css` | All sidebar styles, scoped to `#loc-sidebar` to avoid host page conflicts |
+| `background/service-worker.js` | Handles toolbar icon clicks and relays state changes to the sidebar |
+| `settings/settings.html` | API key configuration page |
+| `settings/settings.css` | Settings page styles |
+| `settings/settings.js` | Reads and writes API keys via Chrome storage |
+| `popup/popup.html` | Legacy popup (kept for reference, not active) |
+| `popup/popup.js` | Legacy popup logic (kept for reference, not active) |
+| `api/gemini.js` | Gemini API calls — keyword extraction, originality analysis, rewrite |
+| `api/serper.js` | Serper search API calls |
 | `utils/keywords.js` | Keyword extraction prompt builder and response parser |
 | `utils/search.js` | LinkedIn-scoped query builder and result deduplicator |
 | `utils/storage.js` | Thin wrapper around `chrome.storage.local` |
-| `icons/` | Extension icons at 16 px, 48 px, and 128 px |
+| `icons/` | Extension icons at 16px, 48px, and 128px |
 
 ---
 
 ## Limitations
 
-- **24-hour window returns fewer results.** Google's index lags behind real-time LinkedIn posts by several hours, so very recent posts may not surface in the 24-hour window. Use 7 days for more representative results.
-- **Only public LinkedIn posts are found.** Posts set to "Connections only" or "Only me" are not indexed by Google and will not appear in search results.
-- **Gemini free tier has a daily request limit.** Each full scan makes two Gemini calls (keyword extraction + analysis) and an optional third for the rewrite. If you hit the daily limit, you will see a rate-limit error — wait until the next UTC day for the quota to reset. A production API key from Google Cloud (with billing enabled) removes this limit.
-- **Serper free tier includes 2,500 searches per month.** Each scan fires one search per keyword (up to five), so a single scan uses up to five searches. The free tier is sufficient for regular personal use.
+- **24-hour window may return fewer results** — Google's index lags behind real-time LinkedIn posts by several hours. Use the 7-day window for more representative results.
+- **Only publicly indexed LinkedIn posts are found** — posts set to "Connections only" or "Only me" are not indexed by Google and will not appear.
+- **Gemini free tier has a daily request limit** — each scan makes two Gemini calls (keywords + analysis) plus an optional third for the rewrite. If you hit the limit, wait until the next UTC midnight for quota to reset.
+
+---
+
+## Contributing
+
+Pull requests welcome. Please open an issue first to discuss what you'd like to change.
+
+---
+
+## License
+
+MIT
